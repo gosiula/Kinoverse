@@ -1,0 +1,76 @@
+.header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #0f1027;
+  height: 10vh;
+  color: white;
+  font-size: 4vh;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.kinoverse-logo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.kinoverse-kino {
+  color: #ee2835;
+}
+
+.kinoverse-verse {
+  color: white;
+}
+
+.kinoverse-icon {
+  margin-left: 10px;
+  size: 30px;
+  color: #ee2835;
+}
+
+.header-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 3vh;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  transition: background-color 0.3s;
+}
+
+.my-events-active {
+  color: #bda895 !important;
+}
+
+.header-current-button {
+  background: none;
+  border: none;
+  color: #ee2835;
+  font-size: 3vh;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  transition: background-color 0.3s;
+}
+
+.header-button:hover {
+  background-color: #282a64;
+}
+
+.header-icon {
+  margin-right: 2vh;
+  font-size: 3.5vh;
+  margin-top: 0.5vh;
+}
+
+.header-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

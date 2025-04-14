@@ -1,0 +1,128 @@
+.order-summary-info {
+  margin-left: 100px;
+}
+
+.order-summary-page p {
+  margin-left: 20px;
+}
+
+.order-summary-page p2 {
+  margin-top: 20px;
+}
+
+.order-summary-page h2 {
+  color: #0f1027;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.order-summary-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.order-summary-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.order-summary-info,
+.order-summary-extras {
+  flex: 1;
+  min-width: 280px;
+}
+
+.order-summary-extras {
+  border-left: 1px solid #ccc;
+  margin-top: 40px;
+}
+
+.order-summary-extras p {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-left: 50px;
+  color: #0f1027;
+  white-space: nowrap;
+}
+
+.tickets-and-snacks-info {
+  margin-left: 50px;
+}
+
+.email-and-pay {
+  margin-top: 20px;
+  display: flex;
+}
+
+.email-pay-container {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 300px;
+  margin-right: 120px;
+}
+
+.email-label {
+  margin-top: 30px;
+  font-size: 16px;
+  margin-bottom: -5px;
+}
+
+.email-input {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.pay-button {
+  margin-top: 20px;
+  background-color: #f2bd36;
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  display: inline; /* Ustawienie elementu w linii */
+  white-space: nowrap; /* Zapobieganie łamaniu tekstu */
+  margin-top: 50px;
+}
+
+.pay-button:hover {
+  background-color: #ca9c26;
+}
+
+.pay-button.disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: default;
+  opacity: 0.6;
+}
+
+.payment-timer-container {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+.payment-timer {
+  color: #e53935;
+  font-size: 16px;
+  margin-left: 5px;
+}

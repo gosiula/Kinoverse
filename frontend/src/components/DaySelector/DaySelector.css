@@ -1,0 +1,59 @@
+.day-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 25px;
+  margin-left: 50px;
+}
+
+.day-button {
+  margin: 5px 0;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #414696;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+.day-button:hover {
+  background-color: #1e2252;
+}
+
+.day-button:active {
+  background-color: #692828;
+}
+
+.day-button.selected {
+  background-color: #ee2835;
+}
+
+.calendar-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #414696;
+  transition: color 0.3s;
+}
+
+.calendar-button.unavailable {
+  color: #ee2835;
+}
+
+.calendar-popup {
+  position: absolute;
+  z-index: 9999;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  right: 200px;
+  top: 15%;
+}

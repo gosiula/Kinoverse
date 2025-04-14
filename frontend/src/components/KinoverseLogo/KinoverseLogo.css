@@ -1,0 +1,31 @@
+.login-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.login-kinoverse-logo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.login-kinoverse-kino {
+  color: #ee2835;
+}
+
+.login-kinoverse-verse {
+  color: white;
+}
+
+.login-kinoverse-icon {
+  margin-left: 10px;
+  color: #ee2835;
+  font-size: 1.6rem;
+}
+
+.login-kinoverse-kino,
+.login-kinoverse-verse {
+  font-size: 1.6rem;
+}

@@ -1,0 +1,37 @@
+.app-background-gradient {
+  text-align: center;
+  height: 100vh;
+  background: #191c49;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-attachment: fixed;
+}
+
+.big-kinoverse-logo {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.big-kinoverse-logo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.big-kinoverse-kino {
+  color: #ee2835;
+}
+
+.big-kinoverse-verse {
+  color: white;
+}
+
+.big-kinoverse-icon {
+  margin-left: 10px;
+  size: 1000px;
+  color: #ee2835;
+}

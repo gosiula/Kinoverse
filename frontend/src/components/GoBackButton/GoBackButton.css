@@ -1,0 +1,44 @@
+.go-back-button {
+  background-color: #414696;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 120px;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+.go-back-button:hover {
+  background-color: #1f235f;
+}
+
+.go-back-icon {
+  font-size: 25px;
+}
+
+.go-back-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.go-back-second-icon {
+  margin-right: 20px;
+  color: #414696;
+  margin-left: 10px;
+  size: 20px;
+  font-size: 30px;
+}
+
+.go-back-header label {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #414696;
+  display: column;
+  margin-left: 30px;
+}

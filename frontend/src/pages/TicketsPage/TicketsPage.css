@@ -1,0 +1,47 @@
+.showing-details-info {
+  margin-left: 150px;
+}
+
+.showing-details-ticket-page p {
+  margin-left: 20px;
+}
+
+.showing-details-ticket-page h2 {
+  color: #25263b;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.showing-details-ticket-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  margin-right: 200px;
+}
+
+.ticket-options-container {
+  width: 35%;
+  margin-left: 20px;
+}
+
+.confirm-tickets-btn {
+  margin-top: 100px;
+  background-color: #f2bd36;
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  display: inline;
+  white-space: nowrap;
+}
+
+.confirm-tickets-btn:hover {
+  background-color: #ca9c26;
+}
