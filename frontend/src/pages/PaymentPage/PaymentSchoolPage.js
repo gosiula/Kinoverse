@@ -187,7 +187,7 @@ function PaymentSchoolPage() {
                   const hasLocalSnacks = Object.keys(storedSnacks).length > 0;
 
                   if (!hasLocalSnacks) {
-                    return `${showingDetails.summary?.order_total || 0} zł`;
+                    return `${showingDetails?.price || 0} zł`;
                   }
 
                   let snackTotal = 0;
