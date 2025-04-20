@@ -28,7 +28,7 @@ def edit_order():
         snack_quantities = data.get("snack_quantities", {})
 
         # Czy poprawne order_id
-        if not order_id or order_id < 0:
+        if not order_id or not order_id.isdigit() or int(order_id) < 0:
             return jsonify({"error": "Brak wymaganych danych"}), 400
 
         # Modyfikacja zamówienia

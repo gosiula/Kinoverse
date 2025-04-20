@@ -297,6 +297,23 @@ function EditOrderPage() {
   const allSnacks = [...(snacks.jedzenie || []), ...(snacks.picie || [])];
 
   const handleSaveOrder = () => {
+    // Pobierz liczbę wybranych miejsc z localStorage
+    const selectedSeats =
+      JSON.parse(localStorage.getItem("selectedSeats")) || [];
+    const maxTickets = selectedSeats.length; // Liczba wybranych miejsc
+
+    // Oblicz łączną liczbę zamówionych biletów
+    const totalTickets = Object.values(ticketQuantities).reduce(
+      (sum, quantity) => sum + quantity,
+      0
+    );
+
+    // Sprawdź, czy liczba zamówionych biletów nie przekracza liczby wybranych miejsc
+    if (totalTickets > maxTickets) {
+      alert("Liczba zamówionych biletów przekracza liczbę wybranych miejsc.");
+      return; // Zablokuj zapis zamówienia
+    }
+
     console.log("Zapisano!");
     console.log("Email:", email);
     console.log("Opłacone:", isPaid);
