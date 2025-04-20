@@ -17,7 +17,8 @@ function SuccessPaymentPage() {
       <DefaultHeader />
       <Confirmation
         onConfirm={handlePayment}
-        title2="SUKCES! UDAŁO SIĘ DOKONAĆ REZERWACJI!"
+        title1="SUKCES!"
+        title2="UDAŁO SIĘ DOKONAĆ REZERWACJI!"
         color="#191C49"
         text="POWRÓT DO STRONY GŁÓWNEJ"
       />

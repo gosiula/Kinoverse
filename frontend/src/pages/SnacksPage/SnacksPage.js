@@ -70,6 +70,9 @@ function SnacksPage() {
 
   const allSnacks = [...snacks.jedzenie, ...snacks.picie];
 
+  console.log(snacks);
+  console.log(allSnacks);
+
   return (
     <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
       <DefaultHeader />

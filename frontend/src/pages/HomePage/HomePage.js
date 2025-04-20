@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DefaultHeader from "../../components/Headers/DeaultHeader";
-import CitySelector from "../../components/CitySelector/CitySelector";
+import CitySelector from "../../components/Selectors/CitySelector";
 import DaySelector from "../../components/DaySelector/DaySelector";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { formatDate2 } from "../../utils/formatDate2";
 import ShowingDetails from "../../components/ShowingDetails/ShowingDetails";
 import "./HomePage.css";
 import "../../App.css";
-
 
 function HomePage() {
   const navigate = useNavigate();
@@ -85,7 +84,7 @@ function HomePage() {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Błąd przy pobieraniu pokazów:", error);
+        console.error("Błąd przy pobieraniu seansów:", error);
         setLoading(false);
       }
     };
@@ -136,7 +135,7 @@ function HomePage() {
               />
             ))
           ) : (
-            <span>Brak dostępnych pokazów.</span>
+            <span>Brak dostępnych seansów.</span>
           )}
         </div>
       )}

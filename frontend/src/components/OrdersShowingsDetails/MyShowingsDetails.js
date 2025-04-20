@@ -2,11 +2,11 @@ import React from "react";
 import { formatDate3 } from "../../utils/formatDate3";
 import ticketImage from "../../images/ticket_normal.png";
 import ticketImageSchool from "../../images/ticket_school.png";
-import "./MyShowingsDetails.css";
+import "./OrdersShowingsDetails.css";
 
 const MyShowingsDetails = ({ showing }) => {
   return (
-    <div className="my-showings-details-wrapper">
+    <div className="orders-showings-details-wrapper">
       <img
         src={
           showing?.showing_type === "school" ? ticketImageSchool : ticketImage
@@ -14,17 +14,30 @@ const MyShowingsDetails = ({ showing }) => {
         alt="Ticket"
         className="ticket-background"
       />{" "}
-      <div className="my-showings-details-content">
+      <div className="showings-details-content">
         <div className="left-section">
-          <p className="my-showings-title">{showing?.film_name}</p>
+          <p className="orders-showings-title">{showing?.film_name}</p>
           <p>
             <strong>Data seansu:</strong>{" "}
             {formatDate3(showing?.showing_datetime).split(" ")[0]}
           </p>
           <p>
             <strong>Godzina seansu:</strong>{" "}
-            {formatDate3(showing?.showing_datetime).split(" ")[1]}
+            {(() => {
+              const timeStr = formatDate3(showing?.showing_datetime).split(
+                " "
+              )[1];
+              const [hours, minutes] = timeStr.split(":").map(Number);
+              const date = new Date();
+              date.setHours(hours);
+              date.setMinutes(minutes);
+              date.setHours(date.getHours() - 2);
+              const newHours = String(date.getHours()).padStart(2, "0");
+              const newMinutes = String(date.getMinutes()).padStart(2, "0");
+              return `${newHours}:${newMinutes}`;
+            })()}
           </p>
+
           <p>
             <strong>Kino:</strong> {showing?.cinema_name}
           </p>
@@ -34,9 +47,16 @@ const MyShowingsDetails = ({ showing }) => {
           <p>
             <strong>Język:</strong> {showing?.language}
           </p>
-          <p>
-            <strong>Miejsca:</strong> {showing?.language}
-          </p>
+          {showing?.showing_type !== "school" && (
+            <p>
+              <strong>Miejsca:</strong> {showing?.seat_locations?.join(", ")}
+            </p>
+          )}
+          {showing?.showing_type === "school" && (
+            <p>
+              <strong>Miejsca:</strong> Rezerwacja całej sali
+            </p>
+          )}
           <p>
             <strong>Cena:</strong> {showing?.total_amount} zł
           </p>
@@ -57,7 +77,7 @@ const MyShowingsDetails = ({ showing }) => {
                 <p>{showing.ticket_summary.reduced} x Ulgowy</p>
               )}
               {showing?.ticket_summary?.school > 0 && (
-                <p>{showing.ticket_summary.school} x Szkolny</p>
+                <p>{showing.room_capacity} x Szkolny</p>
               )}
               {showing?.ticket_summary?.senior > 0 && (
                 <p>{showing.ticket_summary.senior} x Senior</p>
@@ -69,7 +89,7 @@ const MyShowingsDetails = ({ showing }) => {
 
           <div className="snacks-and-tickets-container">
             <p>
-              <strong>Przekąski:</strong>
+              <strong>Przekąski: </strong>
             </p>
             <div>
               {showing?.snack_summary?.split(", ").map((item, idx) => (

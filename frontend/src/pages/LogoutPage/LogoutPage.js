@@ -9,7 +9,7 @@ function LogoutPage() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("authData");
+    localStorage.clear();
     navigate("/home");
   };
 

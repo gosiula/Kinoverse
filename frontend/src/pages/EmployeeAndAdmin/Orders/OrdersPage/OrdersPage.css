@@ -1,0 +1,15 @@
+.selector-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.orders-list {
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+
+.no-orders-message {
+  margin-top: 50px;
+  margin-left: 50px;
+}

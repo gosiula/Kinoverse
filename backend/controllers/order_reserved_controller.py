@@ -7,6 +7,10 @@ bp = Blueprint('order_reserved', __name__, url_prefix='/api')
 @bp.route("/order_reserved/<int:order_id>", methods=["PUT"])
 def update_reserved_order(order_id):
     try:
+        # Sprawdzenie, czy liczba nie jest ujemna
+        if order_id < 0:
+            return jsonify({"error": "order_id musi być nieujemną liczbą całkowitą"}), 400
+        
         data = request.json
         if not data:
             return jsonify({"error": "Brak danych w żądaniu"}), 400
@@ -15,6 +19,7 @@ def update_reserved_order(order_id):
         types = data.get('types')
         seats = data.get('seats')
         mail = data.get('mail', '')
+        print(types)
         
         if not showing_id or not types or not seats:
             return jsonify({"error": "Brakujące dane: showingID, types lub seats"}), 400

@@ -5,6 +5,7 @@ import { ImFilm } from "react-icons/im";
 import { GiFilmProjector } from "react-icons/gi";
 import { FaSchool } from "react-icons/fa6";
 import { MdAccountCircle } from "react-icons/md";
+import { FaCartShopping } from "react-icons/fa6";
 import "./Headers.css";
 
 const UserHeader = () => {
@@ -33,6 +34,8 @@ const UserHeader = () => {
   const auth = getAuth();
   const isLoggedIn = !!auth;
   const isUser = auth?.role === "USER";
+  const isEmployee = auth?.role === "EMPLOYEE";
+  const isAdmin = auth?.role === "ADMIN";
 
   const baseMenuItems = [
     {
@@ -49,9 +52,18 @@ const UserHeader = () => {
 
   if (isLoggedIn && isUser) {
     baseMenuItems.push({
-      path: "/my_showings",
+      path: "/user/my_showings",
       label: "MOJE SEANSE",
       icon: <MdAccountCircle />,
+    });
+  }
+  if (isLoggedIn && (isEmployee || isAdmin)) {
+    const ordersPath = isEmployee ? "/employee/orders" : "/admin/orders";
+
+    baseMenuItems.push({
+      path: ordersPath,
+      label: "ZAMÓWIENIA",
+      icon: <FaCartShopping />,
     });
   }
 
@@ -95,6 +107,13 @@ const UserHeader = () => {
             localStorage.removeItem("email");
             localStorage.removeItem("orderCreatedAt");
             localStorage.removeItem("showingType");
+            localStorage.removeItem("editShowingId");
+            localStorage.removeItem("editCapacity");
+            localStorage.removeItem("editMail");
+            localStorage.removeItem("editIsPaid");
+            localStorage.removeItem("editTickets");
+            localStorage.removeItem("editSeats");
+            localStorage.removeItem("editSnacks");
             navigate(item.path);
           }}
         >

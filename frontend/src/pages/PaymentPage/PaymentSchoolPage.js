@@ -34,13 +34,19 @@ function PaymentSchoolPage() {
 
   const auth = getAuth();
   const isUser = auth?.role === "USER";
+  const isEmployee = auth?.role === "EMPLOYEE";
+  const isAdmin = auth?.role === "ADMIN";
+
   const storedEmail =
     localStorage.getItem("email") || (isUser ? auth?.mail : "") || "";
 
   const [email, setEmail] = useState(storedEmail);
   const [isEmailValid, setIsEmailValid] = useState(
-    storedEmail.includes("@") && storedEmail.length > 0
+    isAdmin ||
+      isEmployee ||
+      (storedEmail?.includes("@") && storedEmail.length > 0)
   );
+
   const showing_id = localStorage.getItem("showingId");
   const type = localStorage.getItem("showingType");
 

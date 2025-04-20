@@ -1,6 +1,6 @@
 from database.database_connect.db import get_db_connection
 
-# Pobranie informacji o użytkowniku do logowania
+# Pobranie informacji o użytkowniku do logowania po mailu
 def get_user_by_email(email):
     conn = get_db_connection()
     cur = conn.cursor()
@@ -25,10 +25,8 @@ def get_user_by_email(email):
         cur.close()
         conn.close()
 
-from database.database_connect.db import get_db_connection
 
-
-# Sprawdzanie czy użytkownik istnieje
+# Sprawdzanie czy użytkownik istnieje do rejestracji
 def check_user_exists(email):
     conn = get_db_connection()
     cur = conn.cursor()

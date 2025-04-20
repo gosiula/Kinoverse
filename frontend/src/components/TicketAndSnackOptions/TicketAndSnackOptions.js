@@ -7,11 +7,13 @@ function TicketAndSnackSelector({
   setQuantities,
   onConfirm,
   buttonText = "Potwierdź wybór",
-  maxTotal = Infinity,
-  button = true, // domyślnie brak limitu
+  maxTotal = Infinity, // domyślnie brak limitu
+  button = true,
 }) {
   const total = Object.values(quantities).reduce((acc, val) => acc + val, 0);
   const isValid = total > 0 && total <= maxTotal;
+
+  console.log(items);
 
   const updateQuantity = (name, change) => {
     setQuantities((prev) => {

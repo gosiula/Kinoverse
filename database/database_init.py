@@ -33,7 +33,7 @@ CREATE TABLE Films (
 CREATE TABLE Showing_prices (
     ID SERIAL PRIMARY KEY,
     normal NUMERIC,
-    child NUMERIC,
+    reduced NUMERIC,
     senior NUMERIC,
     school NUMERIC
 );
@@ -81,7 +81,7 @@ CREATE TABLE Tickets (
     ID SERIAL PRIMARY KEY,
     type VARCHAR(50),
     price NUMERIC,
-    OrdersID INTEGER REFERENCES Orders(ID),
+    OrdersID INTEGER REFERENCES Orders(ID) ON DELETE CASCADE,
     SeatsID INTEGER REFERENCES Seats(ID)
 );
 
@@ -95,7 +95,7 @@ CREATE TABLE Snacks (
 CREATE TABLE Order_snacks (
     ID SERIAL PRIMARY KEY,
     quantity INTEGER,
-    OrdersID INTEGER REFERENCES Orders(ID),
+    OrdersID INTEGER REFERENCES Orders(ID) ON DELETE CASCADE,
     SnacksID INTEGER REFERENCES Snacks(ID)
 );
 """)

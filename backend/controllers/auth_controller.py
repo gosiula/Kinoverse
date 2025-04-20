@@ -11,9 +11,11 @@ def login():
         email = data.get("email")
         password = data.get("password")
 
+        # Jeżeli brakuje maila lub hasła, dostajemy błąd
         if not email or not password:
             return jsonify({"error": "Email i hasło są wymagane"}), 400
 
+        # Logowanie
         result = login_user(email, password)
 
         if "error" in result:

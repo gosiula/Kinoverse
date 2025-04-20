@@ -6,6 +6,9 @@ bp = Blueprint('occupied_seats', __name__, url_prefix='/api')
 # Zajęte miejsca dla danego seansu
 @bp.route("/occupied_seats/<int:showing_id>", methods=["GET"])
 def get_occupied_seats(showing_id):
+    if showing_id < 0:
+        return jsonify({"error": "showing_id musi być nieujemną liczbą całkowitą"}), 400
+
     occupied_seats = get_occupied_seats_for_showing(showing_id)
     if occupied_seats:
         return jsonify(occupied_seats)

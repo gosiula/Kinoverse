@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import "./GoBackButton.css";
 
-function GoBackButton({ path, text, icon: Icon, clearStorageKeys = [] }) {
+function GoBackButton({ path, text, icon: Icon, clearLocalKeys = [] }) {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    clearStorageKeys.forEach((key) => localStorage.removeItem(key));
+    clearLocalKeys.forEach((key) => localStorage.removeItem(key));
     navigate(path);
   };
 

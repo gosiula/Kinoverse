@@ -16,7 +16,8 @@ def finalize_order():
         order_id = data.get("orderId")
         snack_quantities = data.get("snack_quantities", {})
 
-        if not showing_id or not email:
+        # Sprawdzenie, czy są dane wejściowe
+        if not showing_id:
             return jsonify({"error": "Brakujące dane"}), 400
 
         success, new_order_id = OrderFinalizationFacade.finalize_order(

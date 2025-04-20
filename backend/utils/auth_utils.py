@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import bcrypt
 
 SECRET_KEY = "tajny_klucz"
-TOKEN_EXPIRATION_MINUTES = 60
+TOKEN_EXPIRATION_MINUTES = 1440
 
 def verify_password(plain_password, hashed_password):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))

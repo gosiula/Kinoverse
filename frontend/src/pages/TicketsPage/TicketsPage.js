@@ -29,6 +29,8 @@ function TicketsPage() {
     }
   });
 
+  console.log(ticketQuantities);
+
   const ticketTypes = [
     {
       id: 1,
@@ -38,7 +40,7 @@ function TicketsPage() {
     {
       id: 2,
       name: "Ulgowy",
-      price: parseFloat(showingDetails?.prices?.child ?? 0),
+      price: parseFloat(showingDetails?.prices?.reduced ?? 0),
     },
     {
       id: 3,
@@ -102,7 +104,7 @@ function TicketsPage() {
         path={type == "schools" ? "/schools" : "/home"}
         text="Wybór biletów"
         icon={IoTicketSharp}
-        clearLocalKeys={["showingId"]}
+        clearLocalKeys={["showingId", "ticketQuantities"]}
       />
 
       {loading ? (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DefaultHeader from "../../components/Headers/DeaultHeader";
 import CalendarPicker from "../../components/CalendarPicker/CalendarPicker";
-import MyShowingsDetails from "../../components/MyShowingsDetails/MyShowingsDetails";
+import MyShowingsDetails from "../../components/OrdersShowingsDetails/MyShowingsDetails";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import "./MyShowingsPage.css";
 import "../../App.css";

@@ -37,23 +37,24 @@ class SnacksOrderDecorator(OrderDecorator):
         return success, order_id
 
 
-class FinalizeOrderFactory:
-    @staticmethod
-    def create(showing_id, email, snack_quantities, order_id=None):
-        showing_type = get_showing_type(showing_id)
+# class FinalizeOrderFactory:
+#     @staticmethod
+#     def create(showing_id, email, snack_quantities, order_id=None):
+#         showing_type = get_showing_type(showing_id)
 
-        # Dla SCHOOL tworzymy zamówienie dopiero teraz
-        if showing_type == "school":
-            new_order_id = create_school_order(showing_id)
-            base = FinalizeOrderBase(new_order_id, email)
-        elif showing_type == "normal":
-            if not order_id:
-                raise ValueError("Brak orderId dla seansu typu 'normal'")
-            base = FinalizeOrderBase(order_id, email)
-        else:
-            raise ValueError(f"Nieobsługiwany typ seansu: {showing_type}")
+#         # Dla SCHOOL tworzymy zamówienie dopiero teraz
+#         if showing_type == "school":
+#             new_order_id = create_school_order(showing_id)
+#             base = FinalizeOrderBase(new_order_id, email)
+#         elif showing_type == "normal":
+#             if not order_id:
+#                 raise ValueError("Brak orderId dla seansu typu 'normal'")
+#             base = FinalizeOrderBase(order_id, email)
+#         else:
+#             raise ValueError(f"Nieobsługiwany typ seansu: {showing_type}")
 
-        if snack_quantities and any(int(qty) > 0 for qty in snack_quantities.values()):
-            return SnacksOrderDecorator(base, snack_quantities)
-        else:
-            return base
+#         # if snack_quantities and any(int(qty) > 0 for qty in snack_quantities.values()):
+#         #     return SnacksOrderDecorator(base, snack_quantities)
+#         # else:
+#         #     return base
+#         return SnacksOrderDecorator(base, snack_quantities)

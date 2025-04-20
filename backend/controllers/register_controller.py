@@ -14,7 +14,10 @@ def register():
         surname = data.get("surname")
         password = data.get("password")
         confirm_password = data.get("confirm_password")
-        role = data.get("role", "USER")  # Domyślnie "USER" jeśli brak roli
+        role = data.get("role", "USER")  # Domyślnie "USER"
+
+        if not email or "@" not in email:
+            return jsonify({"error": "Nieprawidłowy adres email"}), 400
 
         # Sprawdzanie czy hasła są takie same
         if password != confirm_password:

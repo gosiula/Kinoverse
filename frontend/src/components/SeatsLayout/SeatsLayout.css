@@ -136,7 +136,7 @@
   white-space: nowrap; /* Zapobieganie łamaniu tekstu */
 }
 
-.choose-seats-btn:hover {
+.continue-button:hover {
   background-color: #ca9c26;
 }
 

@@ -18,15 +18,41 @@ function ConfirmPaymentPage() {
   const orderCreatedAt = localStorage.getItem("orderCreatedAt");
   const type = localStorage.getItem("showingType");
 
+  const getAuth = () => {
+    try {
+      const auth = JSON.parse(localStorage.getItem("authData"));
+      if (!auth?.token) return null;
+
+      const tokenParts = auth.token.split(".");
+      if (tokenParts.length !== 3) return null;
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (payload.exp < currentTime) return null;
+
+      return auth;
+    } catch {
+      return null;
+    }
+  };
+
+  const auth = getAuth();
+  const isUser = auth?.role === "USER";
+  const isEmployee = auth?.role === "EMPLOYEE";
+  const isAdmin = auth?.role === "ADMIN";
+
   useEffect(() => {
+    const noAuthOrUser = !auth || isUser;
+
     if (
-      (type == "school" && !showing_id) ||
-      (type == "normal" &&
+      (type === "school" && !showing_id) ||
+      (type === "normal" &&
         (!ticketQuantities ||
           !selectedSeats ||
           !orderId ||
           !orderCreatedAt ||
-          !email))
+          (noAuthOrUser && !email)))
     ) {
       navigate("/error");
     }
@@ -36,10 +62,9 @@ function ConfirmPaymentPage() {
     const snackQuantities = JSON.parse(
       localStorage.getItem("snackQuantities") || "{}"
     );
-
     const orderId = localStorage.getItem("orderId") || null;
 
-    if (!orderId && type == "normal") {
+    if (!orderId && type === "normal") {
       alert("Brak ID zamówienia!");
       return;
     }
@@ -68,12 +93,24 @@ function ConfirmPaymentPage() {
         localStorage.removeItem("ticketQuantities");
         localStorage.removeItem("capacity");
         localStorage.removeItem("selectedSeats");
-        localStorage.removeItem("orderId");
         localStorage.removeItem("snackQuantities");
-        localStorage.removeItem("email");
         localStorage.removeItem("orderCreatedAt");
         localStorage.removeItem("showingType");
-        if (type == "schools") {
+
+        // await fetch("http://localhost:5000/api/finalize_order_and_send_email", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     orderId: orderId,
+        //     email: email,
+        //   }),
+        // });
+        localStorage.removeItem("orderId");
+        localStorage.removeItem("email");
+
+        if (type === "schools") {
           navigate("/schools/success");
         } else {
           navigate("/home/success");

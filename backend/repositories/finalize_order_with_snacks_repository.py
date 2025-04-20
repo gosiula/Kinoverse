@@ -35,12 +35,16 @@ def set_order_email_and_status(order_id, email):
         conn.close()
 
 
-# Opcjonalne dodanie przekąsek do zamówienia
 def add_snacks_to_order(order_id, snack_quantities):
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
+        # Jeżeli nie przesłano przekąsek – inicjalizujemy pusty słownik
+        if not isinstance(snack_quantities, dict):
+            snack_quantities = {}
+
+        # Sprawdź, czy zamówienie nadal jest ważne
         cur.execute("""
             SELECT s.data_time 
             FROM Showings s
@@ -52,6 +56,17 @@ def add_snacks_to_order(order_id, snack_quantities):
             print("Nie można dodać przekąsek – seans w przeszłości")
             return False
 
+        # Usuwamy wszystkie istniejące przekąski
+        cur.execute("""
+            DELETE FROM Order_snacks 
+            WHERE OrdersID = %s
+        """, (order_id,))
+
+        if not snack_quantities:
+            conn.commit()
+            return True
+
+        # Dodaj nowe przekąski (jeśli jakiekolwiek są)
         for snack_name, quantity in snack_quantities.items():
             if quantity <= 0 or quantity > 50:
                 raise ValueError(f"Nieprawidłowa ilość przekąski: {snack_name}")
@@ -124,7 +139,7 @@ def create_school_order(showing_id):
 
         # 4. Pobieramy wszystkie ceny biletów i pojemność sali
         cur.execute("""
-            SELECT sp.normal, sp.child, sp.senior, sp.school, sr.capacity
+            SELECT sp.normal, sp.reduced, sp.senior, sp.school, sr.capacity
             FROM Showings s
             JOIN Showing_prices sp ON s.Showing_pricesID = sp.ID
             JOIN Screening_rooms sr ON s.Screening_roomsID = sr.ID
@@ -134,12 +149,12 @@ def create_school_order(showing_id):
         if not row:
             raise ValueError("Brak danych o cenach lub pojemności sali")
 
-        normal_price, child_price, senior_price, school_price, capacity = row
+        normal_price, reduced_price, senior_price, school_price, capacity = row
         
         # Tworzymy słownik cen zgodny z oczekiwaniami strategii
         price_dict = {
             'normal': normal_price,
-            'reduced': child_price,
+            'reduced': reduced_price,
             'senior': senior_price,
             'school': school_price
         }

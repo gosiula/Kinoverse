@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { FaLocationDot } from "react-icons/fa6";
-import "./CitySelector.css";
+import "./Selector.css";
 
 const CitySelector = ({ cities, selectedCity, onCityChange }) => {
   return (
-    <div className="city-selector">
-      <div className="city-selector-label">
-        <FaLocationDot className="city-icon" />
+    <div className="selector">
+      <div className="selector-label">
+        <FaLocationDot className="selector-icon" />
         <label htmlFor="city">Miasto:</label>
       </div>
       <select id="city" value={selectedCity} onChange={onCityChange}>

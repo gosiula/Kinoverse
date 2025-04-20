@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DefaultHeader from "../../components/Headers/DeaultHeader";
-import CitySelector from "../../components/CitySelector/CitySelector";
+import CitySelector from "../../components/Selectors/CitySelector";
 import DaySelector from "../../components/DaySelector/DaySelector";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import ShowingDetails from "../../components/ShowingDetails/ShowingDetails";
@@ -90,7 +90,7 @@ function SchoolPage() {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Błąd przy pobieraniu pokazów:", error);
+        console.error("Błąd przy pobieraniu seansów:", error);
         setLoading(false);
       }
     };
@@ -146,7 +146,7 @@ function SchoolPage() {
               })}
             </div>
           ) : (
-            <p>Brak dostępnych pokazów.</p>
+            <p>Brak dostępnych seansów.</p>
           )}
         </div>
       )}

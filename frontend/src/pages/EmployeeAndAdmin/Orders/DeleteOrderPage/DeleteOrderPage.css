@@ -1,0 +1,23 @@
+.go-back-order-button {
+  margin-top: 20px;
+  background-color: #f2bd36;
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.go-back-order-button:hover {
+  background-color: #ca9c26;
+}
+
+.go-back-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

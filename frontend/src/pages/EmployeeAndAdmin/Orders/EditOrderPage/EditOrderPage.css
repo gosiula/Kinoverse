@@ -1,0 +1,62 @@
+.save-order-button {
+  margin-left: 100px;
+  margin-top: 20px;
+  background-color: #f2bd36;
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.save-order-button:hover {
+  background-color: #ca9c26;
+}
+
+.edit-email-label {
+  margin-top: 30px;
+  font-size: 16px;
+  margin-bottom: -5px;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.edit-email-input {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.edit-paid-checkbox {
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
+.order-form-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.left-column {
+  flex: 1;
+}
+
+.right-column {
+  width: 35%;
+  margin-right: 120px;
+  margin-bottom: 50px;
+}
+
+.left-column {
+  margin-left: 150px;
+  margin-bottom: 100px;
+}
+
+.ticket-options-container {
+  margin-top: 30px;
+}

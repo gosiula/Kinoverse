@@ -1,7 +1,7 @@
 .ticket-options {
   display: flex;
   flex-direction: column;
-  align-items: center; /* <- zmiana z flex-start na center */
+  align-items: center;
   gap: 20px;
 }
 
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 300px; /* stała szerokość paneli */
+  min-width: 300px;
   justify-content: space-between;
 }
 
@@ -57,7 +57,6 @@
   background-color: #ddd;
 }
 
-/* Przycisk na dole */
 .choose-seats-btn {
   margin-top: 20px;
   background-color: #f2bd36;
@@ -81,6 +80,5 @@
 .choose-seats-btn:disabled {
   background-color: #ccc;
   color: #666;
-  cursor: not-allowed;
   opacity: 0.6;
 }

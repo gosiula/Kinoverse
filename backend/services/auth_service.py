@@ -14,6 +14,7 @@ def login_user(email, password):
     if not verify_password(password, user["password"]):
         return {"error": "Nieprawidłowy email lub hasło"}
 
+    # Utworzenie tokenu
     token = create_jwt_token(user["id"], user["role"], user["mail"])
     return {
         "token": token,

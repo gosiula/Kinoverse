@@ -11,8 +11,11 @@ from controllers.order_summary_controller import bp as order_summary_bp
 from controllers.finalize_order_with_snacks_controller import bp as finalize_order_with_snacks_bp
 from controllers.register_controller import bp as register_bp
 from controllers.auth_controller import bp as login_bp
+from controllers.employee_admin_orders_controller import bp as employee_admin_orders_bp
+from controllers.employee_admin_modify_order_controller import bp as employee_admin_modify_order_bp
+from controllers.employee_admin_delete_order_controller import bp as employee_admin_delete_order_bp
+# from controllers.send_email_controller import bp as send_email_bp
 from services.cleanup_service import start_cleanup_thread
-
 
 
 def create_app():
@@ -31,6 +34,10 @@ def create_app():
     app.register_blueprint(finalize_order_with_snacks_bp, url_prefix='/api')
     app.register_blueprint(login_bp, url_prefix='/api')
     app.register_blueprint(register_bp, url_prefix='/api')
+    app.register_blueprint(employee_admin_orders_bp, url_prefix='/api')
+    app.register_blueprint(employee_admin_modify_order_bp, url_prefix='/api')
+    app.register_blueprint(employee_admin_delete_order_bp, url_prefix='/api')
+    # app.register_blueprint(send_email_bp, url_prefix='/api')
 
     # Uruchom wątek czyszczenia przy starcie aplikacji (usuwanie nieopłaconych rezerwacji po 10 minutach)
     start_cleanup_thread()

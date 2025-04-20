@@ -1,0 +1,146 @@
+.orders-showings-details-wrapper {
+  position: relative;
+  width: 60%;
+  margin: 0px auto;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.ticket-container {
+  position: relative;
+  width: 100%;
+}
+
+.ticket-content-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.ticket-background {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0);
+  z-index: 1;
+}
+
+.showings-details-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: absolute;
+  align-items: center;
+  top: 0%;
+  left: 10%;
+  right: 10%;
+  background-color: rgba(255, 255, 255, 0);
+  color: #191c49;
+  padding: 20px;
+  border-radius: 12px;
+  z-index: 2;
+  align-items: center;
+}
+
+.orders-details-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: relative;
+  align-items: flex-start;
+  margin: 30px 10% 10px;
+  background-color: rgba(255, 255, 255, 0);
+  color: #191c49;
+  z-index: 2;
+}
+
+.orders-showings-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.left-section {
+  width: 60%;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.right-section {
+  width: 35%;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  justify-content: center;
+  align-items: center;
+}
+
+.divider {
+  width: 3px;
+  height: 200px;
+  background-color: #ffffff;
+  margin: 0 40px;
+  align-items: center;
+}
+
+.snacks-and-tickets-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.order-button-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+  padding-bottom: 20px;
+  margin-top: 40px;
+  margin-left: 10%;
+}
+
+.edit-button,
+.delete-button {
+  color: white;
+  font-weight: bold;
+  font-size: 1.4rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  display: inline;
+  white-space: nowrap;
+}
+
+.edit-button {
+  background-color: #f2bd36;
+}
+
+.edit-button:hover {
+  background-color: #ca9c26;
+}
+
+.delete-button {
+  background-color: #ee2835;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #ad1b25;
+  color: white;
+}
+
+.delete-button.disabled,
+.edit-button.disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: default;
+  opacity: 0.6;
+}

@@ -19,7 +19,10 @@ import RegisterNamePage from "./pages/Login/RegisterNamePage";
 import ConfirmRegisterPage from "./pages/Login/ConfirmRegisterPage";
 import SuccessRegisterPage from "./pages/Login/SuccessRegisterPage";
 import LogoutPage from "./pages/LogoutPage/LogoutPage";
-import MyShowingsPage from "./pages/MyShowingsPage/MyShowingsPage";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import UserRoutes from "./routes/UserRoutes";
+import EmployeeRoutes from "./routes/EmployeeRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -67,7 +70,30 @@ const App = () => {
       <Route path="/schools/confirm_payment" element={<ConfirmPaymentPage />} />
       <Route path="/home/success" element={<SuccessPaymentPage />} />
       <Route path="/schools/success" element={<SuccessPaymentPage />} />
-      <Route path="my_showings" element={<MyShowingsPage />} />
+      <Route
+        path="/user/*"
+        element={
+          <ProtectedRoute requiredRole="USER">
+            <UserRoutes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee/*"
+        element={
+          <ProtectedRoute requiredRole="EMPLOYEE">
+            <EmployeeRoutes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminRoutes />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };

@@ -1,12 +1,11 @@
-.city-selector {
+.selector {
   margin-top: 30px;
-  margin-right: 30px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.city-selector label {
+.selector label {
   font-size: 18px;
   font-weight: bold;
   color: #414696;
@@ -15,7 +14,7 @@
   margin-top: 5px;
 }
 
-.city-selector select {
+.selector select {
   padding: 8px;
   font-size: 16px;
   border-radius: 4px;
@@ -23,14 +22,23 @@
   width: 25%;
 }
 
-.city-selector-label {
+.selector-label {
   display: flex;
   align-items: center;
 }
 
-.city-icon {
+.selector-icon {
   margin-right: 8px;
   color: #414696;
   margin-left: 50px;
   margin-bottom: 5px;
+}
+
+.showing-selector select {
+  width: 250px;
+  margin-right: 100px;
+}
+
+.hour-selector select {
+  width: 180px;
 }

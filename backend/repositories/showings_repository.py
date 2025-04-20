@@ -129,72 +129,6 @@ def fetch_showings_for_school(date, cinema_id):
         conn.close()
 
 
-# Funkcja do pobierania seansów danego użytkownika
-def fetch_showings_by_email_and_date(email, start_date, end_date):
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    try:
-        # Przekształcamy daty do formatu ISO (yyyy-mm-dd)
-        start_date = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d")
-
-        query = """
-            SELECT 
-                s.data_time, 
-                sr.name AS screening_room_name, 
-                c.name AS cinema_name, 
-                c.address AS cinema_address, 
-                s.language, 
-                s.type AS showing_type, 
-                sr.capacity AS room_capacity,  
-                o.mail,
-                f.name AS film_name,
-
-                COUNT(CASE WHEN t.type = 'normal' THEN 1 END) AS normal_tickets,
-                COUNT(CASE WHEN t.type = 'reduced' THEN 1 END) AS child_tickets,
-                COUNT(CASE WHEN t.type = 'senior' THEN 1 END) AS senior_tickets,
-                COUNT(CASE WHEN t.type = 'school' THEN 1 END) AS school_tickets,
-
-                STRING_AGG(DISTINCT sn.name || ' (' || os.quantity || ' szt.)', ', ') AS snacks,
-
-                COALESCE(SUM(t.price), 0) AS total_tickets_amount,
-                COALESCE(SUM(sn.price * os.quantity), 0) AS total_snacks_amount,
-
-                STRING_AGG(DISTINCT se.row || se.number::text, ', ') AS seat_locations
-
-            FROM Orders o
-            JOIN Showings s ON s.ID = o.showingID
-            JOIN Films f ON f.ID = s.FilmID
-            JOIN Screening_rooms sr ON sr.ID = s.Screening_roomsID
-            JOIN Cinemas c ON c.ID = sr.CinemasID
-            JOIN Users u ON u.mail = o.mail
-            LEFT JOIN Tickets t ON t.OrdersID = o.ID
-            LEFT JOIN Seats se ON se.ID = t.SeatsID
-            LEFT JOIN Order_snacks os ON os.OrdersID = o.ID
-            LEFT JOIN Snacks sn ON sn.ID = os.SnacksID
-
-            WHERE o.mail = %s 
-            AND s.data_time BETWEEN %s AND %s
-
-            GROUP BY s.data_time, sr.name, c.name, c.address, s.language, s.type, sr.capacity, o.mail, f.name
-            ORDER BY s.data_time;
-
-        """
-
-
-        cur.execute(query, (email, start_date, end_date))
-        showings = cur.fetchall()
-
-        return showings
-
-    except Exception as e:
-        print(f"Błąd zapytania: {e}")
-        return []
-    finally:
-        cur.close()
-        conn.close()
-
 
 # Pobieranie typu seansu
 def fetch_showing_type_by_id(showing_id):
@@ -242,7 +176,7 @@ def fetch_normal_showing_details_by_id(showing_id):
 
             # Zapytanie o ceny biletów
             price_query = """
-            SELECT normal, child, senior, school
+            SELECT normal, reduced, senior, school
             FROM Showing_prices
             WHERE ID = %s;
             """
@@ -250,9 +184,9 @@ def fetch_normal_showing_details_by_id(showing_id):
             price_row = cur.fetchone()
 
             if price_row:
-                normal_price, child_price, senior_price, school_price = price_row
+                normal_price, reduced_price, senior_price, school_price = price_row
             else:
-                normal_price = child_price = senior_price = school_price = None
+                normal_price = reduced_price = senior_price = school_price = None
 
             # Zapytanie o liczbę zajętych miejsc
             occupied_query = """
@@ -277,7 +211,7 @@ def fetch_normal_showing_details_by_id(showing_id):
                 "showing_language": showing_language,
                 "prices": {
                     "normal": normal_price,
-                    "child": child_price,
+                    "reduced": reduced_price,
                     "senior": senior_price,
                     "school": school_price
                 }

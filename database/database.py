@@ -110,13 +110,13 @@ def generate_school_price():
 # Dodawanie cen biletów
 for _ in range(5):
     normal_price = random.randint(30, 40)
-    child_price = normal_price - 10
+    reduced_price = normal_price - 10
     senior_price = normal_price - 15
     school_price = generate_school_price()
     cur.execute("""
-    INSERT INTO Showing_prices (normal, child, senior, school)
+    INSERT INTO Showing_prices (normal, reduced, senior, school)
     VALUES (%s, %s, %s, %s);
-    """, (normal_price, child_price, senior_price, school_price))
+    """, (normal_price, reduced_price, senior_price, school_price))
 
 from datetime import timedelta
 
@@ -256,7 +256,7 @@ for i, (showing_id, room_id) in enumerate(showings):
     """, (user_id, showing_id, True))
     order_id = cur.fetchone()[0]
 
-    # Losowe miejsca (bez duplikatów)
+    # Losowe miejsca (bez duplikatów) - jeśli to seans typu school, wszystkie miejsca w sali
     seats = random.sample(seats_by_room[room_id], k=random.randint(1, 5))
     used_seat_ids = set()
 
@@ -268,14 +268,12 @@ for i, (showing_id, room_id) in enumerate(showings):
 
     # Pobierz ceny z tabeli Showing_prices
     cur.execute("""
-        SELECT normal, child, senior, school FROM Showing_prices WHERE ID = %s
+        SELECT normal, reduced, senior, school FROM Showing_prices WHERE ID = %s
     """, (showing_prices_id,))
-    price_normal, price_child, price_senior, price_school = cur.fetchone()
+    price_normal, price_reduced, price_senior, price_school = cur.fetchone()
 
-    used_seat_ids = set()
-
+    # Jeśli seans jest typu "school", wszystkie miejsca w sali muszą być zajęte
     if showing_type == 'school':
-        # Dodaj bilety na wszystkie miejsca w sali, wszystkie jako 'school'
         all_seat_ids = seats_by_room[room_id]
         for seat_id in all_seat_ids:
             if seat_id in used_seat_ids:
@@ -286,15 +284,16 @@ for i, (showing_id, room_id) in enumerate(showings):
                 VALUES (%s, %s, %s, %s);
             """, ('school', price_school, order_id, seat_id))
     else:
+        # Jeśli to inny typ seansu, losowo wybieramy miejsca
         for seat_id in seats:
             if seat_id in used_seat_ids:
                 continue
             used_seat_ids.add(seat_id)
 
-            ticket_type = random.choice(['normal', 'child', 'senior'])
+            ticket_type = random.choice(['normal', 'reduced', 'senior'])
             ticket_price = {
                 'normal': price_normal,
-                'child': price_child,
+                'reduced': price_reduced,
                 'senior': price_senior
             }[ticket_type]
 
@@ -305,14 +304,18 @@ for i, (showing_id, room_id) in enumerate(showings):
 
     # Co 2-3 zamówienia dodaj przekąski
     if random.random() < 0.6:
-        num_snacks = random.randint(1, 3)
-        for _ in range(num_snacks):
-            snack_id = random.randint(1, 5)
+        available_snacks = list(range(1, 6))  # Zakładamy SnacksID od 1 do 5
+        random.shuffle(available_snacks)
+        num_snacks = random.randint(1, min(3, len(available_snacks)))  # max 3 różne przekąski
+
+        for i in range(num_snacks):
+            snack_id = available_snacks[i]
             quantity = random.randint(1, 3)
             cur.execute("""
             INSERT INTO Order_snacks (quantity, OrdersID, SnacksID)
             VALUES (%s, %s, %s);
             """, (quantity, order_id, snack_id))
+
 
 # Zatwierdzanie zmian i zamknięcie połączenia
 conn.commit()

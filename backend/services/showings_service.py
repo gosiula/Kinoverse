@@ -11,43 +11,6 @@ def showings_factory(show_type):
         raise ValueError(f"Nieobsługiwany typ pokazu: {show_type}")
 
 
-from repositories.showings_repository import fetch_showings_by_email_and_date
-
-
-# Pobiera seanse dla danego użytkownika
-def get_showings_for_user(email, start_date, end_date):
-    showings_data = fetch_showings_by_email_and_date(email, start_date, end_date)
-    
-    if not showings_data:
-        return []
-
-    results = []
-    
-    for showing in showings_data:
-        showing_data = {
-            "showing_datetime": showing[0],
-            "screening_room_name": showing[1],
-            "cinema_name": showing[2],
-            "cinema_address": showing[3],
-            "language": showing[4],
-            "showing_type": showing[5],
-            "room_capacity": showing[6],
-            "film_name": showing[8],
-            "ticket_summary": {
-                "normal": showing[9],
-                "reduced": showing[10],
-                "senior": showing[11],
-                "school": showing[12],
-            },
-            "snack_summary": showing[13],
-            "total_amount": showing[14] + showing[15],
-            "seat_locations": showing[16].split(', ') if showing[16] else []
-        }
-        results.append(showing_data)
-
-    return results
-
-
 # Fabryka wybierająca odpowiednią funkcję repozytorium
 def showing_details_factory(show_type):
     if show_type == "normal":
