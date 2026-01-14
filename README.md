@@ -71,6 +71,7 @@ end_date = datetime(2025, 6, 30)
 
 ### 4️⃣ Run the backend
 In the backend folder:
+
 <PROJECT_PATH>/backend/.venv/Scripts/python.exe \
 <PROJECT_PATH>/backend/app.py
 
@@ -79,4 +80,4 @@ In the frontend folder:
 
 npm start
 
-🎉 The application is now running!
+### 6️⃣ The application is now running! 🎉
