@@ -20,6 +20,7 @@ https://github.com/user-attachments/assets/7fe1cbcf-801b-4855-af72-df13f9b527c3
 - ➕ Create new orders manually
 - ✏️ Edit existing orders:
   - change tickets
+  - change seats
   - change snacks
   - edit customer email
 - ❌ Delete orders
