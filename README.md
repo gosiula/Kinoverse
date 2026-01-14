@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/7fe1cbcf-801b-4855-af72-df13f9b527c3
 ## ✨ Key Features
 
 ### 👤 Client (User)
-- 🎞️ Browse movie screenings by type (normal or for schoold), date and city
+- 🎞️ Browse movie screenings by type (normal or for schools), date and city
 - 🪑 Seat reservation with visual seat map
 - 🎟️ Ticket types: normal, reduced, senior
 - 🍿 Add snacks and drinks to the order
