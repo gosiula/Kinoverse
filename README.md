@@ -54,16 +54,19 @@ In the **database** folder, run in terminal:
 
 ### 2️⃣ Add tables and triggers
 In the database folder, run:
+
 <PROJECT_PATH>/backend/.venv/Scripts/python.exe \
 <PROJECT_PATH>/database/database_init.py
 
 ### 3️⃣ Populate the database with sample data
 In the database folder, run:
+
 <PROJECT_PATH>/backend/.venv/Scripts/python.exe \
 <PROJECT_PATH>/database/database.py
 
 You can configure screening dates inside database.py, for example:
-start_date = datetime(2025, 4, 1)
+
+start_date = datetime(2025, 4, 1) \
 end_date = datetime(2025, 6, 30)
 
 ### 4️⃣ Run the backend
@@ -73,6 +76,7 @@ In the backend folder:
 
 ### 5️⃣ Run the frontend
 In the frontend folder:
+
 npm start
 
 🎉 The application is now running!
