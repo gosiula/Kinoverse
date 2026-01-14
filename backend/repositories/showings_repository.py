@@ -9,15 +9,17 @@ def fetch_showings_by_filters(date, cinema_id):
     cur = conn.cursor()
 
     try:
+        # 1) Pobierz seanse + pojemność sali (capacity)
         query = """
             SELECT 
-                s.ID,               -- ID seansu
-                s.data_time,        -- Data i godzina seansu
-                s.language,         -- Język seansu
-                f.ID,               -- ID filmu
-                f.name,             -- Nazwa filmu
-                f.description,      -- Opis filmu
-                f.photo             -- Zdjęcie filmu
+                s.ID,               
+                s.data_time,        
+                s.language,         
+                sr.capacity,
+                f.ID,               
+                f.name,             
+                f.description,      
+                f.photo             
             FROM Showings s
             JOIN Films f ON s.FilmID = f.ID
             JOIN Screening_rooms sr ON s.Screening_roomsID = sr.ID
@@ -29,25 +31,54 @@ def fetch_showings_by_filters(date, cinema_id):
         cur.execute(query, (date, "normal", cinema_id))
         rows = cur.fetchall()
 
+        if not rows:
+            return []
+
+        # 2) Policz zajęte miejsca dla WSZYSTKICH tych seansów naraz
+        showing_ids = [r[0] for r in rows]
+        occupied_map = {sid: 0 for sid in showing_ids}
+
+        occ_query = """
+            SELECT o.showingID, COUNT(DISTINCT t.SeatsID) AS occupied
+            FROM Tickets t
+            JOIN Orders o ON t.OrdersID = o.ID
+            WHERE o.showingID = ANY(%s)
+            GROUP BY o.showingID;
+        """
+        cur.execute(occ_query, (showing_ids,))
+        for sid, occupied in cur.fetchall():
+            occupied_map[sid] = occupied
+
+        # 3) Sklej wynik jak wcześniej, ale dodaj empty_seats + sold_out do każdego seansu
         films_showings = defaultdict(list)
 
         for row in rows:
+            showing_id = row[0]
+            showing_time = row[1]
+            language = row[2]
+            capacity = row[3]
+
+            occupied = occupied_map.get(showing_id, 0)
+            empty_seats = max(0, capacity - occupied)
+
             showing = {
-                "id": row[0],
-                "hour": row[1].time().isoformat(timespec='minutes'),
-                "language": row[2],
+                "id": showing_id,
+                "hour": showing_time.time().isoformat(timespec="minutes"),
+                "language": language,
+                "empty_seats": empty_seats,
+                "sold_out": empty_seats == 0
             }
-            film_id = row[3]
-            film_name = row[4]
-            film_description = row[5]
-            film_photo = base64.b64encode(row[6]).decode('utf-8') if row[6] else None
-            
-            films_showings[film_id, film_name, film_description, film_photo].append(showing)
+
+            film_id = row[4]
+            film_name = row[5]
+            film_description = row[6]
+            film_photo = base64.b64encode(row[7]).decode("utf-8") if row[7] else None
+
+            films_showings[(film_id, film_name, film_description, film_photo)].append(showing)
 
         result = []
         for (film_id, film_name, film_description, film_photo), showings in films_showings.items():
             showings_sorted = sorted(showings, key=lambda x: x["hour"])
-
             result.append({
                 "film_id": film_id,
                 "name": film_name,
@@ -58,6 +89,7 @@ def fetch_showings_by_filters(date, cinema_id):
             })
 
         return result
+
     except Exception as e:
         print(f"Błąd zapytania: {e}")
         return []
@@ -72,15 +104,17 @@ def fetch_showings_for_school(date, cinema_id):
     cur = conn.cursor()
 
     try:
+        # 1) Pobierz seanse + pojemność sali
         query = """
             SELECT 
-                s.ID,               -- ID seansu
-                s.data_time,        -- Data i godzina seansu
-                s.language,         -- Język seansu
-                f.ID,               -- ID filmu
-                f.name,             -- Nazwa filmu
-                f.description,      -- Opis filmu
-                f.photo             -- Zdjęcie filmu
+                s.ID,
+                s.data_time,
+                s.language,
+                sr.capacity,
+                f.ID,
+                f.name,
+                f.description,
+                f.photo
             FROM Showings s
             JOIN Films f ON s.FilmID = f.ID
             JOIN Screening_rooms sr ON s.Screening_roomsID = sr.ID
@@ -92,25 +126,54 @@ def fetch_showings_for_school(date, cinema_id):
         cur.execute(query, (date, "school", cinema_id))
         rows = cur.fetchall()
 
+        if not rows:
+            return []
+
+        # 2) Policz zajęte miejsca dla tych seansów naraz
+        showing_ids = [r[0] for r in rows]
+        occupied_map = {sid: 0 for sid in showing_ids}
+
+        occ_query = """
+            SELECT o.showingID, COUNT(DISTINCT t.SeatsID) AS occupied
+            FROM Tickets t
+            JOIN Orders o ON t.OrdersID = o.ID
+            WHERE o.showingID = ANY(%s)
+            GROUP BY o.showingID;
+        """
+        cur.execute(occ_query, (showing_ids,))
+        for sid, occupied in cur.fetchall():
+            occupied_map[sid] = occupied
+
+        # 3) Sklej wynik + empty_seats + sold_out
         films_showings = defaultdict(list)
 
         for row in rows:
+            showing_id = row[0]
+            showing_time = row[1]
+            language = row[2]
+            capacity = row[3]
+
+            occupied = occupied_map.get(showing_id, 0)
+            empty_seats = max(0, capacity - occupied)
+
             showing = {
-                "id": row[0],
-                "hour": row[1].time().isoformat(timespec='minutes'),
-                "language": row[2],
+                "id": showing_id,
+                "hour": showing_time.time().isoformat(timespec="minutes"),
+                "language": language,
+                "empty_seats": empty_seats,
+                "sold_out": empty_seats == 0
             }
-            film_id = row[3]
-            film_name = row[4]
-            film_description = row[5]
-            film_photo = base64.b64encode(row[6]).decode('utf-8') if row[6] else None
-            
-            films_showings[film_id, film_name, film_description, film_photo].append(showing)
+
+            film_id = row[4]
+            film_name = row[5]
+            film_description = row[6]
+            film_photo = base64.b64encode(row[7]).decode("utf-8") if row[7] else None
+
+            films_showings[(film_id, film_name, film_description, film_photo)].append(showing)
 
         result = []
         for (film_id, film_name, film_description, film_photo), showings in films_showings.items():
             showings_sorted = sorted(showings, key=lambda x: x["hour"])
-
             result.append({
                 "film_id": film_id,
                 "name": film_name,
@@ -121,6 +184,7 @@ def fetch_showings_for_school(date, cinema_id):
             })
 
         return result
+
     except Exception as e:
         print(f"Błąd zapytania: {e}")
         return []

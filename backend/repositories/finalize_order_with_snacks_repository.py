@@ -111,8 +111,35 @@ def get_showing_type(showing_id):
 def create_school_order(showing_id):
     conn = get_db_connection()
     cur = conn.cursor()
+
     try:
-        # 1. Tworzymy zamówienie
+        # 0) Zablokuj wiersz seansu, żeby 2 osoby nie zrobiły tego naraz
+        cur.execute("""
+            SELECT ID, Screening_roomsID
+            FROM Showings
+            WHERE ID = %s
+            FOR UPDATE
+        """, (showing_id,))
+        showing_row = cur.fetchone()
+        if not showing_row:
+            raise ValueError("Nie znaleziono seansu")
+
+        room_id = showing_row[1]
+
+        # 0.5) Jeśli są jakiekolwiek bilety na ten seans -> szkoła NIE może kupić całej sali
+        cur.execute("""
+            SELECT 1
+            FROM Tickets t
+            JOIN Orders o ON t.OrdersID = o.ID
+            WHERE o.showingID = %s
+            LIMIT 1
+        """, (showing_id,))
+        if cur.fetchone() is not None:
+            # sala już zajęta (częściowo lub całkowicie) => traktuj jako wyprzedane dla school
+            conn.rollback()
+            return None
+
+        # 1) Tworzymy zamówienie (rezerwacja)
         cur.execute("""
             INSERT INTO Orders (showingID, payed)
             VALUES (%s, FALSE)
@@ -120,24 +147,17 @@ def create_school_order(showing_id):
         """, (showing_id,))
         new_order_id = cur.fetchone()[0]
 
-        # 2. Pobieramy Screening room ID
+        # 2) Pobieramy wszystkie Seats z tej sali
         cur.execute("""
-            SELECT Screening_roomsID FROM Showings WHERE ID = %s
-        """, (showing_id,))
-        room_row = cur.fetchone()
-        if not room_row:
-            raise ValueError("Brak sali dla seansu")
-        room_id = room_row[0]
-
-        # 3. Pobieramy wszystkie Seats z tej sali
-        cur.execute("""
-            SELECT ID FROM Seats WHERE Screening_roomID = %s
+            SELECT ID
+            FROM Seats
+            WHERE Screening_roomID = %s
         """, (room_id,))
         seat_rows = cur.fetchall()
         if not seat_rows:
             raise ValueError("Brak miejsc w sali")
 
-        # 4. Pobieramy wszystkie ceny biletów i pojemność sali
+        # 3) Pobieramy ceny biletów i pojemność sali
         cur.execute("""
             SELECT sp.normal, sp.reduced, sp.senior, sp.school, sr.capacity
             FROM Showings s
@@ -150,24 +170,19 @@ def create_school_order(showing_id):
             raise ValueError("Brak danych o cenach lub pojemności sali")
 
         normal_price, reduced_price, senior_price, school_price, capacity = row
-        
-        # Tworzymy słownik cen zgodny z oczekiwaniami strategii
+
         price_dict = {
-            'normal': normal_price,
-            'reduced': reduced_price,
-            'senior': senior_price,
-            'school': school_price
+            "normal": normal_price,
+            "reduced": reduced_price,
+            "senior": senior_price,
+            "school": school_price
         }
-        
-        # Pobieramy strategię dla biletu szkolnego
-        school_strategy = get_price_strategy('school')
-        
-        # Obliczamy cenę biletu przy użyciu strategii
+
+        school_strategy = get_price_strategy("school")
         ticket_price = school_strategy.get_price(price_dict, capacity)
 
-        # 5. Dodajemy bilety dla wszystkich miejsc
-        for seat_row in seat_rows:
-            seat_id = seat_row[0]
+        # 4) Dodajemy bilety dla wszystkich miejsc
+        for (seat_id,) in seat_rows:
             cur.execute("""
                 INSERT INTO Tickets (type, price, OrdersID, SeatsID)
                 VALUES ('school', %s, %s, %s)

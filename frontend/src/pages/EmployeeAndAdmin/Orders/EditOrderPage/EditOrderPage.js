@@ -52,12 +52,13 @@ function EditOrderPage() {
   const orderId = localStorage.getItem("orderToEdit");
 
   useEffect(() => {
-    const noAuthOrUser = !auth || isUser;
+    const noAuthOrUser = !auth || auth?.role === "USER";
 
     if (!orderId || noAuthOrUser) {
-      navigate("/error");
+      navigate("/error", { replace: true });
+      return;
     }
-  }, [orderId, navigate]);
+  }, [orderId, auth, navigate]);
 
   const mapSeatsToStorageFormat = (seats) => {
     return seats.map((seat) => ({
@@ -395,7 +396,11 @@ function EditOrderPage() {
         localStorage.removeItem("editTickets");
         localStorage.removeItem("editSeats");
         localStorage.removeItem("editSnacks");
-        navigate("/employee/orders/edit/success");
+        if (isEmployee) {
+          navigate("/employee/orders/edit/success");
+        } else if (isAdmin) {
+          navigate("/admin/orders/edit/success");
+        }
       } else {
         alert("Błąd: " + result.error);
       }

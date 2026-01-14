@@ -46,7 +46,7 @@ function DeleteOrderSuccessPage() {
         <Confirmation
           onConfirm={onConfirm}
           title1="SUKCES!"
-          title2="ZAMÓWIENIE ZOSTAŁO USUNIĘTE"
+          title2="ZAMÓWIENIE ZOSTAŁO USUNIĘTE!"
           color="#0F1027"
           text="POWRÓT DO STRONY GŁÓWNEJ"
         />

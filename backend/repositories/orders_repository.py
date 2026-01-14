@@ -22,24 +22,25 @@ def update_order_email(order_id, email):
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT s.data_time 
+            SELECT 1
             FROM Showings s
             JOIN Orders o ON s.ID = o.showingID
             WHERE o.ID = %s AND s.data_time > NOW()
         """, (order_id,))
-        
+
         if not cur.fetchone():
-            raise ValueError("Seans nie istnieje lub jest w przeszłości")
             return False
 
         cur.execute("""
             UPDATE Orders SET mail = %s, payed = TRUE
             WHERE ID = %s
         """, (email, order_id))
+
         conn.commit()
         return True
     except Exception as e:
         print(f"Błąd update_order_email: {e}")
+        conn.rollback()
         return False
     finally:
         cur.close()
@@ -51,25 +52,25 @@ def update_order_snacks(order_id, snack_quantities):
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT s.data_time 
+            SELECT 1
             FROM Showings s
             JOIN Orders o ON s.ID = o.showingID
             WHERE o.ID = %s AND s.data_time > NOW()
         """, (order_id,))
-        
         if not cur.fetchone():
-            raise ValueError("Seans nie istnieje lub jest w przeszłości")
             return False
 
         cur.execute("DELETE FROM Order_snacks WHERE OrdersID = %s", (order_id,))
-        
-        for snack_name, quantity in snack_quantities.items():
+
+        for snack_name, quantity in (snack_quantities or {}).items():
             if quantity <= 0 or quantity > 50:
-                raise ValueError(f"Nieprawidłowa ilość: {snack_name}")
+                return False
+
             cur.execute("SELECT ID FROM Snacks WHERE name = %s", (snack_name,))
             snack_row = cur.fetchone()
             if not snack_row:
-                raise ValueError(f"Nie znaleziono przekąski: {snack_name}")
+                return False
+
             snack_id = snack_row[0]
             cur.execute("""
                 INSERT INTO Order_snacks (OrdersID, SnacksID, quantity)
@@ -80,64 +81,80 @@ def update_order_snacks(order_id, snack_quantities):
         return True
     except Exception as e:
         print(f"Błąd update_order_snacks: {e}")
+        conn.rollback()
         return False
     finally:
         cur.close()
         conn.close()
 
 
+
 def update_order_tickets(order_id, ticket_quantities):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
+        # sprawdź czy seans przyszły + pobierz typ seansu
         cur.execute("""
-            SELECT s.data_time 
+            SELECT s.type
             FROM Showings s
             JOIN Orders o ON s.ID = o.showingID
             WHERE o.ID = %s AND s.data_time > NOW()
         """, (order_id,))
-        
-        if not cur.fetchone():
-            raise ValueError("Seans nie istnieje lub jest w przeszłości")
+        row = cur.fetchone()
+        if not row:
             return False
 
-        cur.execute("SELECT ID, SeatsID FROM Tickets WHERE OrdersID = %s", (order_id,))
-        existing_tickets = cur.fetchall()
-        
-        total_new_tickets = sum(ticket_quantities.values())
-        
-        if len(existing_tickets) < total_new_tickets:
-            needed_extra = total_new_tickets - len(existing_tickets)
-            print(f"Need to add {needed_extra} extra tickets without seats")
-        elif len(existing_tickets) > total_new_tickets:
-            tickets_to_delete = existing_tickets[total_new_tickets:]
-            for ticket_id, _ in tickets_to_delete:
+        showing_type = row[0]
+
+        # Dla SCHOOL nie zmieniamy biletów tutaj
+        # (bo to ma być cała sala, i łatwo to zepsuć edycją normal/reduced/senior)
+        if showing_type == "school":
+            return True
+
+        # --- NORMAL: aktualizujemy bilety wg kluczy normal/reduced/senior ---
+        tq = ticket_quantities or {}
+        total_new = int(tq.get("normal", 0)) + int(tq.get("reduced", 0)) + int(tq.get("senior", 0))
+
+        # pobierz istniejące bilety w tym orderze
+        cur.execute("SELECT ID FROM Tickets WHERE OrdersID = %s ORDER BY ID", (order_id,))
+        existing = [r[0] for r in cur.fetchall()]
+
+        # dopasuj ilość biletów (usuń / dodaj)
+        if len(existing) > total_new:
+            to_delete = existing[total_new:]
+            for ticket_id in to_delete:
                 cur.execute("DELETE FROM Tickets WHERE ID = %s", (ticket_id,))
-            existing_tickets = existing_tickets[:total_new_tickets]
-        
-        ticket_index = 0
-        for ticket_type, quantity in ticket_quantities.items():
-            if quantity <= 0 or quantity > 300:
-                raise ValueError(f"Nieprawidłowa liczba biletów: {ticket_type}")
-            
-            price = 15.0 if ticket_type == "Normalny" else 10.0
-            
-            for i in range(quantity):
-                if ticket_index < len(existing_tickets):
-                    ticket_id = existing_tickets[ticket_index][0]
-                    cur.execute("""
-                        UPDATE Tickets SET type = %s, price = %s
-                        WHERE ID = %s
-                    """, (ticket_type.lower(), price, ticket_id))
-                    ticket_index += 1
-                else:
-                    cur.execute("""
-                        INSERT INTO Tickets (type, price, OrdersID)
-                        VALUES (%s, %s, %s)
-                    """, (ticket_type.lower(), price, order_id))
+            existing = existing[:total_new]
+
+        elif len(existing) < total_new:
+            missing = total_new - len(existing)
+            for _ in range(missing):
+                cur.execute("""
+                    INSERT INTO Tickets (type, price, OrdersID)
+                    VALUES ('normal', 0, %s)
+                    RETURNING ID
+                """, (order_id,))
+                existing.append(cur.fetchone()[0])
+
+        # teraz ustaw typy + ceny (ceny docelowo weź z Showing_prices, ale tu minimalnie)
+        idx = 0
+        def apply_type(ticket_type, count, price):
+            nonlocal idx
+            for _ in range(count):
+                ticket_id = existing[idx]
+                cur.execute("""
+                    UPDATE Tickets SET type = %s, price = %s
+                    WHERE ID = %s
+                """, (ticket_type, price, ticket_id))
+                idx += 1
+
+        apply_type("normal", int(tq.get("normal", 0)), 15.0)
+        apply_type("reduced", int(tq.get("reduced", 0)), 10.0)
+        apply_type("senior", int(tq.get("senior", 0)), 10.0)
 
         conn.commit()
         return True
+
     except Exception as e:
         print(f"Błąd update_order_tickets: {e}")
         conn.rollback()
@@ -525,9 +542,10 @@ def add_tickets_with_seats(order_id, showing_id, seats, types):
             
             # Znajdź ID miejsca na podstawie jego rzędu i numeru
             cur.execute("""
-                SELECT ID 
-                FROM Seats 
-                WHERE row = %s AND number = %s AND Screening_roomID = %s
+                SELECT s.ID 
+                FROM Seats s
+                WHERE s.row = %s AND s.number = %s AND s.Screening_roomID = %s
+                FOR UPDATE
             """, (row, number, room_id))
             
             seat_result = cur.fetchone()

@@ -107,7 +107,7 @@ function SeatsPage() {
       if (data.created_at) {
         localStorage.setItem("orderCreatedAt", data.created_at);
       }
-
+      localStorage.removeItem("orderExpiresAtMs"); // reset starego timera dla nowego zamówienia
       navigate("/home/snacks");
     } catch (error) {
       console.error("Błąd podczas aktualizacji:", error);

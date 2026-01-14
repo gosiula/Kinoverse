@@ -76,3 +76,15 @@
   pointer-events: none;
   opacity: 0.6;
 }
+
+.sold-out-hour {
+  font-size: 15px;
+}
+
+.soldout-text {
+  margin-top: 2px;
+  font-size: 10px;
+  line-height: 1;
+  color: #b42318;
+  font-weight: 600;
+}

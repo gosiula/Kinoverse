@@ -3,111 +3,90 @@ import { useState, useEffect } from "react";
 // Rezerwacja trwa X minut
 export const RESERVATION_TIME_MINUTES = 10;
 
+// Klucze w localStorage
+const LS_CREATED_AT = "orderCreatedAt";     // string z backendu / ISO / etc.
+const LS_EXPIRES_AT = "orderExpiresAtMs";   // liczba w ms jako string
+
 // Formatowanie MM:SS
 export const formatTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
+  const safeSeconds = Number.isFinite(seconds) ? seconds : 0;
+  const minutes = Math.floor(safeSeconds / 60);
+  const secs = safeSeconds % 60;
+
   return `${minutes.toString().padStart(2, "0")}:${secs
     .toString()
     .padStart(2, "0")}`;
 };
 
-function parsePolishDateToTimestamp(dateString) {
-  const date = new Date(dateString);
+/**
+ * Próbuje sparsować orderCreatedAt (string) do ms.
+ * Obsługuje:
+ * - "YYYY-MM-DD HH:mm:ss"
+ * - "YYYY-MM-DDTHH:mm:ss"
+ * - ISO z Z lub offsetem (+01:00)
+ * Jeśli brak strefy → traktujemy jako UTC (dopisz "Z").
+ */
+function parseCreatedAtMs(createdAtString) {
+  if (!createdAtString) return NaN;
 
-  const formatter = new Intl.DateTimeFormat("pl-PL", {
-    timeZone: "Europe/Warsaw",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+  let s = createdAtString.trim().replace(" ", "T");
 
-  const parts = formatter.formatToParts(date);
-  const values = {};
-  parts.forEach((part) => {
-    if (part.type !== "literal") {
-      values[part.type] = parseInt(part.value, 10);
-    }
-  });
+  const hasTimezone = /Z$/i.test(s) || /[+-]\d{2}:\d{2}$/.test(s);
+  if (!hasTimezone) s = `${s}Z`;
 
-  // Tworzymy timestamp tak, jakby to był czas lokalny w Warszawie
-  const timestamp = Date.UTC(
-    values.year,
-    values.month - 1,
-    values.day,
-    values.hour - 4,
-    values.minute,
-    values.second
-  );
-
-  return timestamp;
+  const ms = new Date(s).getTime();
+  return Number.isFinite(ms) ? ms : NaN;
 }
 
-export function getPolishTimestamp() {
-  const formatter = new Intl.DateTimeFormat("pl-PL", {
-    timeZone: "Europe/Warsaw",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+/**
+ * Zwraca timestamp wygaśnięcia rezerwacji w ms.
+ * - Jeśli LS_EXPIRES_AT już istnieje → używa go (to zapewnia brak resetów między stronami)
+ * - Jeśli nie → liczy z orderCreatedAt i zapisuje LS_EXPIRES_AT
+ */
+function getOrCreateExpiresAtMs() {
+  const existing = Number(localStorage.getItem(LS_EXPIRES_AT));
+  if (Number.isFinite(existing) && existing > 0) return existing;
 
-  const parts = formatter.formatToParts(new Date());
-  const dateParts = {};
-  parts.forEach((part) => {
-    if (part.type !== "literal") {
-      dateParts[part.type] = part.value;
-    }
-  });
+  const createdAtString = localStorage.getItem(LS_CREATED_AT);
+  const createdAtMs = parseCreatedAtMs(createdAtString);
 
-  const isoDateString = `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}`;
-  return new Date(isoDateString).getTime();
+  // jeśli createdAt jest nieparsowalne, nie rób 10 minut "z powietrza" przy każdej stronie:
+  // zrób 10 minut od teraz i zapisz expiresAt, żeby było stabilnie
+  const baseMs = Number.isFinite(createdAtMs) ? createdAtMs : Date.now();
+
+  const expiresAtMs = baseMs + RESERVATION_TIME_MINUTES * 60 * 1000;
+  localStorage.setItem(LS_EXPIRES_AT, String(expiresAtMs));
+  return expiresAtMs;
 }
 
-// Oblicza ile zostało czasu od stworzenia rezerwacji
+// Oblicza ile zostało sekund
 export function calculateInitialTimeLeft() {
-  try {
-    const createdAtString = localStorage.getItem("orderCreatedAt");
-    const createdAtMs = parsePolishDateToTimestamp(createdAtString);
-
-    const nowMs = getPolishTimestamp();
-    const expirationMs = createdAtMs + RESERVATION_TIME_MINUTES * 60 * 1000;
-
-    // Obliczamy różnicę w milisekundach
-    const remainingMs = expirationMs - nowMs;
-
-    // Konwertujemy na sekundy i upewniamy się, że nie mamy wartości ujemnych
-    const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
-
-    return remainingSeconds;
-  } catch (error) {
-    console.error("Błąd przy obliczaniu czasu:", error);
-    return RESERVATION_TIME_MINUTES * 60;
-  }
+  const expiresAtMs = getOrCreateExpiresAtMs();
+  const remainingMs = expiresAtMs - Date.now();
+  return Math.max(0, Math.floor(remainingMs / 1000));
 }
 
-// Hook do używania timera
+// Hook do używania timera (liczy zawsze od expiresAt, nie od lokalnego prevTime)
 export function useReservationTimer() {
   const [timeLeft, setTimeLeft] = useState(calculateInitialTimeLeft());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        const newTime = Math.max(0, prevTime - 1);
-        if (newTime === 0) {
-          clearInterval(interval);
-          alert("Czas rezerwacji zakończył się!");
-        }
-        return newTime;
-      });
-    }, 1000);
+    // w razie nawigacji / odświeżenia — zawsze bierzemy expiresAt z localStorage
+    const tick = () => {
+      const expiresAtMs = getOrCreateExpiresAtMs();
+      const remainingMs = expiresAtMs - Date.now();
+      const seconds = Math.max(0, Math.floor(remainingMs / 1000));
+      setTimeLeft(seconds);
+
+      if (seconds === 0) {
+        // opcjonalnie: można tu czyścić localStorage
+        // localStorage.removeItem(LS_EXPIRES_AT);
+        alert("Czas rezerwacji zakończył się!");
+      }
+    };
+
+    tick(); // od razu ustaw poprawnie
+    const interval = setInterval(tick, 1000);
 
     return () => clearInterval(interval);
   }, []);

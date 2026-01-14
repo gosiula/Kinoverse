@@ -1,6 +1,7 @@
 import psycopg2
 import random
 import os
+from pathlib import Path
 import bcrypt
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from datetime import datetime, timedelta
@@ -47,15 +48,22 @@ for cinema in cinemas:
 
 # Dodawanie filmów
 films = [
+    ('Barbie i Podwodna Tajemnica', 'Barbie odkrywa tajemnice podwodnego świata i walczy o ratunek dla swojej przyjaciółki.', 'barbie.png'),
     ('Frozen', 'Frozen to historia o magicznej krainie, gdzie siostry Elsa i Anna przeżywają niesamowite przygody.', 'frozen.png'),
     ('Shrek', 'Shrek to zabawna opowieść o zielonym ogrze, który nie boi się wyzwań i niezwykłych sytuacji.', 'shrek.png'),
-    ('Barbie i Podwodna Tajemnica', 'Barbie odkrywa tajemnice podwodnego świata i walczy o ratunek dla swojej przyjaciółki.', 'barbie.png'),
     ('Harry Potter', 'Harry Potter to młody czarodziej, który uczęszcza do najbardziej znanej szkoły magii na świecie.', 'harry_potter.png'),
     ('Leon Zawodowiec', 'Leon to profesjonalny zabójca, który nawiązuje nietypową relację z dziewczynką szukającą zemsty.', 'leon.png')
 ]
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+IMAGES_DIR = BASE_DIR / "images"
+
 for film in films:
-    with open(f'images/{film[2]}', 'rb') as f:
+    image_path = IMAGES_DIR / film[2]
+
+    with open(image_path, "rb") as f:
         photo_data = f.read()
     cur.execute("""
     INSERT INTO Films (name, description, photo)
@@ -154,8 +162,8 @@ def generate_showtimes_for_day(date):
 
 
 # Dodawanie seansów
-start_date = datetime(2025, 4, 1)
-end_date = datetime(2025, 6, 30)
+start_date = datetime(2026, 1, 1)
+end_date = datetime(2026, 2, 1)
 
 # Pętla przez 5 filmów i 8 sal
 for film_id in range(1, 6):  # 5 filmów
@@ -245,22 +253,7 @@ user_index = 0
 num_users = len(user_ids)
 
 for i, (showing_id, room_id) in enumerate(showings):
-    user_id = user_ids[user_index]
-    user_index = (user_index + 1) % num_users
-
-    # Utwórz zamówienie
-    cur.execute("""
-    INSERT INTO Orders (mail, showingID, payed, created_at)
-    VALUES ((SELECT mail FROM Users WHERE ID = %s), %s, %s, CURRENT_TIMESTAMP)
-    RETURNING ID;
-    """, (user_id, showing_id, True))
-    order_id = cur.fetchone()[0]
-
-    # Losowe miejsca (bez duplikatów) - jeśli to seans typu school, wszystkie miejsca w sali
-    seats = random.sample(seats_by_room[room_id], k=random.randint(1, 5))
-    used_seat_ids = set()
-
-    # Pobierz typ seansu i ID cen
+    # Pobierz typ seansu i ID cen NA POCZĄTKU (zanim utworzysz order)
     cur.execute("""
         SELECT type, Showing_pricesID FROM Showings WHERE ID = %s
     """, (showing_id,))
@@ -272,9 +265,28 @@ for i, (showing_id, room_id) in enumerate(showings):
     """, (showing_prices_id,))
     price_normal, price_reduced, price_senior, price_school = cur.fetchone()
 
-    # Jeśli seans jest typu "school", wszystkie miejsca w sali muszą być zajęte
-    if showing_type == 'school':
+    # ✅ Jeśli seans jest typu school -> 50% szans na wykupienie CAŁEJ sali, 50% nic
+    if showing_type == "school":
+        buy_entire_room = random.random() < 0.5
+
+        if not buy_entire_room:
+            # 50% przypadków: nikt nie kupuje -> brak ordera, brak biletów
+            continue
+
+        # Jeśli kupują, to tworzymy order dopiero teraz
+        user_id = user_ids[user_index]
+        user_index = (user_index + 1) % num_users
+
+        cur.execute("""
+            INSERT INTO Orders (mail, showingID, payed, created_at)
+            VALUES ((SELECT mail FROM Users WHERE ID = %s), %s, %s, CURRENT_TIMESTAMP)
+            RETURNING ID;
+        """, (user_id, showing_id, True))
+        order_id = cur.fetchone()[0]
+
+        used_seat_ids = set()
         all_seat_ids = seats_by_room[room_id]
+
         for seat_id in all_seat_ids:
             if seat_id in used_seat_ids:
                 continue
@@ -282,19 +294,47 @@ for i, (showing_id, room_id) in enumerate(showings):
             cur.execute("""
                 INSERT INTO Tickets (type, price, OrdersID, SeatsID)
                 VALUES (%s, %s, %s, %s);
-            """, ('school', price_school, order_id, seat_id))
+            """, ("school", price_school, order_id, seat_id))
+
+        # (opcjonalnie) przekąski też tylko jeśli był order
+        if random.random() < 0.6:
+            available_snacks = list(range(1, 6))
+            random.shuffle(available_snacks)
+            num_snacks = random.randint(1, min(3, len(available_snacks)))
+
+            for j in range(num_snacks):
+                snack_id = available_snacks[j]
+                quantity = random.randint(1, 3)
+                cur.execute("""
+                    INSERT INTO Order_snacks (quantity, OrdersID, SnacksID)
+                    VALUES (%s, %s, %s);
+                """, (quantity, order_id, snack_id))
+
     else:
-        # Jeśli to inny typ seansu, losowo wybieramy miejsca
+        # Normalne seanse – zostaje jak było
+        user_id = user_ids[user_index]
+        user_index = (user_index + 1) % num_users
+
+        cur.execute("""
+            INSERT INTO Orders (mail, showingID, payed, created_at)
+            VALUES ((SELECT mail FROM Users WHERE ID = %s), %s, %s, CURRENT_TIMESTAMP)
+            RETURNING ID;
+        """, (user_id, showing_id, True))
+        order_id = cur.fetchone()[0]
+
+        seats = random.sample(seats_by_room[room_id], k=random.randint(1, 5))
+        used_seat_ids = set()
+
         for seat_id in seats:
             if seat_id in used_seat_ids:
                 continue
             used_seat_ids.add(seat_id)
 
-            ticket_type = random.choice(['normal', 'reduced', 'senior'])
+            ticket_type = random.choice(["normal", "reduced", "senior"])
             ticket_price = {
-                'normal': price_normal,
-                'reduced': price_reduced,
-                'senior': price_senior
+                "normal": price_normal,
+                "reduced": price_reduced,
+                "senior": price_senior,
             }[ticket_type]
 
             cur.execute("""
@@ -302,19 +342,18 @@ for i, (showing_id, room_id) in enumerate(showings):
                 VALUES (%s, %s, %s, %s);
             """, (ticket_type, ticket_price, order_id, seat_id))
 
-    # Co 2-3 zamówienia dodaj przekąski
-    if random.random() < 0.6:
-        available_snacks = list(range(1, 6))  # Zakładamy SnacksID od 1 do 5
-        random.shuffle(available_snacks)
-        num_snacks = random.randint(1, min(3, len(available_snacks)))  # max 3 różne przekąski
+        if random.random() < 0.6:
+            available_snacks = list(range(1, 6))
+            random.shuffle(available_snacks)
+            num_snacks = random.randint(1, min(3, len(available_snacks)))
 
-        for i in range(num_snacks):
-            snack_id = available_snacks[i]
-            quantity = random.randint(1, 3)
-            cur.execute("""
-            INSERT INTO Order_snacks (quantity, OrdersID, SnacksID)
-            VALUES (%s, %s, %s);
-            """, (quantity, order_id, snack_id))
+            for j in range(num_snacks):
+                snack_id = available_snacks[j]
+                quantity = random.randint(1, 3)
+                cur.execute("""
+                    INSERT INTO Order_snacks (quantity, OrdersID, SnacksID)
+                    VALUES (%s, %s, %s);
+                """, (quantity, order_id, snack_id))
 
 
 # Zatwierdzanie zmian i zamknięcie połączenia
